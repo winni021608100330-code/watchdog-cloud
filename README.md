@@ -1,204 +1,138 @@
 # WatchDog Cloud
 
-WatchDog Cloud is a GitHub Actions based web page monitoring system.
+GitHub Actions에서 30분마다 웹페이지를 확인하고, 실제로 보이는 콘텐츠가 바뀌면 Telegram으로 알려주는 Cloud 버전 WatchDog입니다.
 
-It checks web pages every 30 minutes, even when your PC is turned off.
+PC가 꺼져 있어도 GitHub Actions가 실행되므로 KSASF 발표 페이지, 공고 페이지, 예약 페이지 같은 사이트를 계속 감시할 수 있습니다.
 
-## What It Does
+## 주요 기능
 
-- Runs on GitHub Actions every 30 minutes
-- Monitors multiple URLs from `monitors.yaml`
-- Saves the latest HTML snapshot
-- Compares the current HTML hash with the previous hash
-- Sends a Telegram alert when HTML changes
-- Sends a Telegram alert when a keyword appears for the first time
-- Prevents duplicate keyword alerts
-- Uses only Python, `requests`, and `beautifulsoup4`
-- Does not use Playwright
+- GitHub Actions에서 30분마다 자동 실행
+- Playwright Chromium으로 실제 브라우저 접속
+- HTML 원본 저장
+- BeautifulSoup으로 실제 보이는 텍스트 추출
+- script, style, hidden input, csrf token, timestamp, 조회수 변화 무시
+- KSASF 같은 게시판은 게시글 번호, 제목, 링크 중심으로 비교
+- 이전/현재 스크린샷 저장
+- 이미지 변경률 계산
+- 이전/현재 화면을 나란히 붙인 비교 이미지 생성
+- 변경 영역을 빨간 박스로 표시
+- Telegram 메시지와 비교 이미지 전송
+- 키워드 최초 등장 감지
+- `data/state.json`으로 이전 상태 저장
 
-## Project Structure
+## 파일 구조
 
 ```text
-WatchDog Cloud/
+.
 ├─ monitor.py
 ├─ monitors.yaml
 ├─ requirements.txt
 ├─ README.md
 ├─ data/
-│  ├─ hashes.json
-│  ├─ keyword_alerts.json
-│  └─ html/
+│  ├─ state.json
+│  ├─ html/
+│  └─ screenshots/
 └─ .github/
    └─ workflows/
       └─ monitor.yml
 ```
 
-The `data` folder is created automatically after the first run.
+## GitHub 저장소 준비
 
-## Step 1. Create a GitHub Repository
-
-1. Go to [GitHub](https://github.com).
-2. Click **New repository**.
-3. Enter a repository name, for example:
-
-   ```text
-   watchdog-cloud
-   ```
-
-4. Create the repository.
-5. Upload all files from this project to the repository.
-
-Important: `monitor.py`, `monitors.yaml`, and `requirements.txt` must be in the repository root.
-
-## Step 2. Create a Telegram Bot
-
-1. Open Telegram.
-2. Search for `BotFather`.
-3. Send:
-
-   ```text
-   /newbot
-   ```
-
-4. Follow the instructions.
-5. Copy the bot token.
-
-The token looks like this:
+1. GitHub에서 새 저장소를 만듭니다.
+2. 이 프로젝트 파일을 저장소에 올립니다.
+3. GitHub 저장소의 `Settings`로 이동합니다.
+4. `Secrets and variables` → `Actions` → `New repository secret`을 누릅니다.
+5. 아래 2개를 등록합니다.
 
 ```text
-1234567890:ABCDEF_your_token_here
+TELEGRAM_BOT_TOKEN
+TELEGRAM_CHAT_ID
 ```
 
-## Step 3. Find Your Telegram Chat ID
+## Actions 활성화
 
-One simple way:
+1. GitHub 저장소의 `Actions` 탭으로 이동합니다.
+2. 처음 사용하는 저장소라면 Actions 사용을 허용합니다.
+3. `WatchDog Cloud Monitor` workflow를 선택합니다.
+4. `Run workflow`를 누르면 수동 실행할 수 있습니다.
+5. 이후에는 30분마다 자동 실행됩니다.
 
-1. Send a message to your new bot.
-2. Open this URL in your browser:
+## 감시 대상 추가
 
-   ```text
-   https://api.telegram.org/botYOUR_BOT_TOKEN/getUpdates
-   ```
-
-3. Find `chat`.
-4. Copy the `id` value.
-
-## Step 4. Add GitHub Secrets
-
-In your GitHub repository:
-
-1. Go to **Settings**.
-2. Go to **Secrets and variables**.
-3. Click **Actions**.
-4. Click **New repository secret**.
-5. Add this secret:
-
-   ```text
-   TELEGRAM_BOT_TOKEN
-   ```
-
-6. Paste your Telegram bot token.
-7. Add another secret:
-
-   ```text
-   TELEGRAM_CHAT_ID
-   ```
-
-8. Paste your Telegram chat ID.
-
-## Step 5. Enable GitHub Actions
-
-1. Go to the **Actions** tab in your repository.
-2. If GitHub asks you to enable workflows, click **I understand my workflows, go ahead and enable them**.
-3. Open **WatchDog Cloud Monitor**.
-4. Click **Run workflow** to test it manually.
-
-After that, it will run every 30 minutes automatically.
-
-## Step 6. Add or Edit Monitors
-
-Open `monitors.yaml`.
-
-Example:
+`monitors.yaml`에 감시할 사이트를 추가합니다.
 
 ```yaml
 - name: KSASF
   url: https://ksasf.ksa.hs.kr/?action=BD0000M&pagecode=P000000023&language=KR
+  mode: board
+  image_threshold: 0.5
   keywords:
     - 본선 진출팀
     - 2026 연구발표 본선 진출팀 발표
-
-- name: Example
-  url: https://example.com/
-  keywords:
     - 발표
 ```
 
-Rules:
+`mode` 값은 아래처럼 사용합니다.
 
-- `name` is the monitor name shown in Telegram.
-- `url` is the page to monitor.
-- `keywords` is a list of words or sentences to detect.
-- Put each keyword on a new line starting with `-`.
+- `board`: 게시판 목록형 사이트용입니다. 게시글 번호, 제목, 링크 중심으로 비교합니다.
+- `text`: 일반 웹페이지용입니다. 화면에 보이는 텍스트 전체를 정리해서 비교합니다.
 
-## How Alerts Work
+`image_threshold`는 이미지 변경률 기준입니다. `0.5`는 0.5% 이상 달라졌을 때 이미지 변경으로 봅니다.
 
-### HTML Change Alert
+## Telegram 알림 내용
 
-The first run saves a baseline.
-
-From the second run, WatchDog Cloud compares the new HTML hash with the previous hash.
-
-If the hash changes, it sends a Telegram alert.
-
-### Keyword Alert
-
-If a keyword appears on the page for the first time, it sends a Telegram alert.
-
-After a keyword alert is sent, it is saved in:
+변경이 감지되면 아래 정보를 보냅니다.
 
 ```text
-data/keyword_alerts.json
+🚨 페이지 변경 감지
+
+이름: KSASF
+시간: 2026-06-26 10:30:00 KST
+이미지 변경률: 0.72%
+URL: https://...
+
+추가된 텍스트:
+* 123 | KSASF 2026 연구발표 본선 진출팀 발표 | https://...
+
+삭제된 텍스트:
+* 122 | 본선 참가자 발표 예정 | https://...
 ```
 
-This prevents duplicate keyword alerts.
+비교 이미지도 함께 전송됩니다.
 
-## Reset Keyword Alerts
+## 상태 저장
 
-If you want to receive keyword alerts again:
+실행 후 GitHub Actions가 아래 파일들을 저장소에 다시 저장합니다.
 
-1. Open `data/keyword_alerts.json`.
-2. Delete the saved keyword entry.
-3. Commit and push the file.
+- `data/state.json`
+- `data/html/`
+- `data/screenshots/`
 
-You can also delete the whole `data/keyword_alerts.json` file.
+이 파일들이 저장되어야 다음 실행 때 이전 상태와 비교할 수 있습니다.
 
-## Run Locally
+## 로컬 테스트
 
-Install dependencies:
+Python 3.12 환경에서 아래 명령으로 실행할 수 있습니다.
 
 ```bash
 pip install -r requirements.txt
-```
-
-Run:
-
-```bash
+python -m playwright install chromium
 python monitor.py
 ```
 
-For local Telegram testing, set environment variables first.
+Telegram을 실제로 보내려면 환경변수를 설정해야 합니다.
 
-PowerShell:
+```bash
+set TELEGRAM_BOT_TOKEN=your_bot_token
+set TELEGRAM_CHAT_ID=your_chat_id
+python monitor.py
+```
+
+Windows PowerShell에서는 아래처럼 설정합니다.
 
 ```powershell
 $env:TELEGRAM_BOT_TOKEN="your_bot_token"
 $env:TELEGRAM_CHAT_ID="your_chat_id"
 python monitor.py
 ```
-
-## Notes
-
-- GitHub Actions scheduled workflows may not run at the exact minute every time.
-- Private repositories may have GitHub Actions minute limits.
-- This project does not render JavaScript pages because Playwright is intentionally not used.

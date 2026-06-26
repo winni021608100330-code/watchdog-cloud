@@ -1,6 +1,15 @@
 - name: KSASF
   url: https://ksasf.ksa.hs.kr/?action=BD0000M&pagecode=P000000023&language=KR
+  mode: board
+  image_threshold: 0.5
   keywords:
-    - 2026 연구발표
-    - KSASF 2026 연구발표 본선 진출팀 발표
-    - 본선 진출팀 발표.pdf
+    - 본선 진출팀
+    - 2026 연구발표 본선 진출팀 발표
+    - 발표
+
+- name: Example
+  url: https://example.com/
+  mode: text
+  image_threshold: 0.5
+  keywords:
+    - 발표
