@@ -7,9 +7,28 @@
     - 2026 연구발표 본선 진출팀 발표
     - 발표
 
-- name: Example
-  url: https://example.com/
-  mode: text
-  image_threshold: 0.5
-  keywords:
-    - 발표
+      - name: Save monitor state
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add data/state.json data/html/ data/screenshots/ || true
+
+          if git diff --cached --quiet; then
+            echo "No monitor state changes to commit."
+          else
+            git commit -m "Update WatchDog Cloud monitor state"
+
+            for attempt in 1 2 3; do
+              git pull --rebase origin "$GITHUB_REF_NAME"
+              if git push origin "HEAD:$GITHUB_REF_NAME"; then
+                echo "Push succeeded."
+                exit 0
+              fi
+              echo "Push failed. Retry $attempt/3 after 5 seconds."
+              sleep 5
+            done
+
+            echo "Push failed after retries."
+            exit 1
+          fi
