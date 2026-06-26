@@ -7,7 +7,7 @@
     - 2026 연구발표 본선 진출팀 발표
     - 발표
 
-      - name: Save monitor state
+       - name: Save monitor state
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
