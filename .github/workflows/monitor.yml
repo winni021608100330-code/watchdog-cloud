@@ -2,11 +2,15 @@ name: WatchDog Cloud Monitor
 
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "*/30 * * * *"
   workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: watchdog-cloud-monitor-state
+  cancel-in-progress: false
 
 jobs:
   monitor:
@@ -15,6 +19,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -23,6 +29,9 @@ jobs:
 
       - name: Install dependencies
         run: pip install -r requirements.txt
+
+      - name: Install Playwright browsers
+        run: python -m playwright install chromium
 
       - name: Run monitor
         env:
@@ -34,11 +43,24 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/hashes.json data/keyword_alerts.json data/html/ || true
+
+          git add data/state.json data/html/ data/screenshots/ || true
+
           if git diff --cached --quiet; then
             echo "No monitor state changes to commit."
           else
             git commit -m "Update WatchDog Cloud monitor state"
-            git push
+
+            for attempt in 1 2 3; do
+              git pull --rebase origin "$GITHUB_REF_NAME"
+              if git push origin "HEAD:$GITHUB_REF_NAME"; then
+                echo "Push succeeded."
+                exit 0
+              fi
+              echo "Push failed. Retry $attempt/3 after 5 seconds."
+              sleep 5
+            done
+
+            echo "Push failed after retries."
+            exit 1
           fi
-          # test
