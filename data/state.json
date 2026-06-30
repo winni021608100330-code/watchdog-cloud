@@ -1,13 +1,15 @@
 {
   "monitors": {
     "KSASF_489598f4911383d7": {
-      "alerted_keywords": [],
-      "html_hash": "33b26ad8852b6d87e7de5d671b22d22fd6cb2579a7d40d7fcf012d886dcf1c42",
-      "last_checked_at": "2026-06-29 22:20:11 UTC",
-      "last_compare": "/home/runner/work/watchdog-cloud/watchdog-cloud/data/screenshots/20260629_222011_KSASF_489598f4911383d7_compare.png",
-      "last_screenshot": "/home/runner/work/watchdog-cloud/watchdog-cloud/data/screenshots/20260629_222003_KSASF_489598f4911383d7.png",
+      "alerted_keywords": [
+        "KSASF 2026"
+      ],
+      "html_hash": "9e419de416614921deb4a7e18992bd4e72497a8c93568ed07286f771dff2ccc3",
+      "last_checked_at": "2026-06-30 10:44:13 UTC",
+      "last_compare": "/home/runner/work/watchdog-cloud/watchdog-cloud/data/screenshots/20260630_104413_KSASF_489598f4911383d7_compare.png",
+      "last_screenshot": "/home/runner/work/watchdog-cloud/watchdog-cloud/data/screenshots/20260630_104407_KSASF_489598f4911383d7.png",
       "name": "KSASF",
-      "text_hash": "60b647cfbc97428ce6354fdfc572612ff8bb451ff9a4d440f251a9c7dbb75461",
+      "text_hash": "54734abab526736f9a3369260da8d7469b760de172c3e9c3e9859ba747e5e7f4",
       "url": "https://ksasf.ksa.hs.kr/?action=BD0000M&pagecode=P000000023&language=KR"
     }
   }
