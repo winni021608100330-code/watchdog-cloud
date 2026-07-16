@@ -4,10 +4,10 @@
       "alerted_keywords": [
         "KSASF 2026"
       ],
-      "html_hash": "382f44553ac1439c192102a97d5f642dedd698e51e4f5c6bcf59c50d1f0368d2",
-      "last_checked_at": "2026-07-16 13:05:55 UTC",
-      "last_compare": "/home/runner/work/watchdog-cloud/watchdog-cloud/data/screenshots/20260716_130555_KSASF_489598f4911383d7_compare.png",
-      "last_screenshot": "/home/runner/work/watchdog-cloud/watchdog-cloud/data/screenshots/20260716_130548_KSASF_489598f4911383d7.png",
+      "html_hash": "509ff5f5e8f8c18807ddd6c20925c7ad2efcbcad6b8c1703cccb1cd5ac48e986",
+      "last_checked_at": "2026-07-16 17:48:40 UTC",
+      "last_compare": "/home/runner/work/watchdog-cloud/watchdog-cloud/data/screenshots/20260716_174840_KSASF_489598f4911383d7_compare.png",
+      "last_screenshot": "/home/runner/work/watchdog-cloud/watchdog-cloud/data/screenshots/20260716_174832_KSASF_489598f4911383d7.png",
       "name": "KSASF",
       "text_hash": "54734abab526736f9a3369260da8d7469b760de172c3e9c3e9859ba747e5e7f4",
       "url": "https://ksasf.ksa.hs.kr/?action=BD0000M&pagecode=P000000023&language=KR"
